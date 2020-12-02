@@ -132,35 +132,6 @@ class _Promise{
     })
     return newPromise
   }
-  all(data) {
-    let count = 0
-    let total = data.length
-    let result = []
-    return new _Promise((resolve, reject) => {
-      for(let i = 0; i < total; i++) {
-        data[i].then(res => {
-          result.push(res)
-          count++
-          if(total === count) {
-            resolve(result)
-          }
-        }, res => {
-          return this.reject(res)
-        })
-      }
-    })
-  }
-  race(data) {
-    const total = data.length
-    return new _Promise((resolve, reject) => {
-      for(let i = 0; i < total; i++) {
-        data[i].then(
-          res => this.resolve(res),
-          res => this.reject(res)
-        )
-      }
-    })
-  }
   catch(onRejected) {
     const newPromise = new _Promise((resolve, reject) => {
       if(this.status === "onRejected") {
@@ -196,12 +167,41 @@ class _Promise{
   }
 }
 _Promise.defer = _Promise.deferred = () => {
-  let dfd = {}
-  dfd.promise = new _Promise((resolve, reject) => {
-    dfd.resolve = resolve
-    dfd.reject = reject
+  let obj = {}
+  obj.promise = new _Promise((resolve, reject) => {
+    obj.resolve = resolve
+    obj.reject = reject
   })
-  return dfd
+  return obj
+}
+_Promise.all = data => {
+  let count = 0
+  let total = data.length
+  let result = []
+  return new _Promise((resolve, reject) => {
+    for(let i = 0; i < total; i++) {
+      data[i].then(res => {
+        result.push(res)
+        count++
+        if(total === count) {
+          resolve(result)
+        }
+      }, res => {
+        return this.reject(res)
+      })
+    }
+  })
+}
+_Promise.race = data => {
+  const total = data.length
+  return new _Promise((resolve, reject) => {
+    for(let i = 0; i < total; i++) {
+      data[i].then(
+        res => resolve(res),
+        res => reject(res)
+      )
+    }
+  })
 }
 _Promise.resolve = data => {
   return new _Promise(res => res(data))
