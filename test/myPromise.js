@@ -2,7 +2,7 @@ class _Promise{
   constructor(fn) {
     this.status         = 'pending'
     this.value          = null
-    this.error          = null
+    this.reason         = null
     this.onFulfilledArr = []
     this.onRejectedArr  = []
     this.resolve        = this.resolve.bind(this)
@@ -62,8 +62,8 @@ class _Promise{
         this.onFulfilledArr.forEach((fn) => fn(value.value))
       }
       if (value.status === "onRejected") {
-        this.error = value.error
-        this.onRejectedArr.forEach((fn) => fn(value.error))
+        this.reason = value.reason
+        this.onRejectedArr.forEach((fn) => fn(value.reason))
       }
       return
     }
@@ -76,7 +76,7 @@ class _Promise{
   reject(err) {
     if(this.status === 'pending') {
       this.status = 'onRejected'
-      this.error  = err
+      this.reason = err
       this.onRejectedArr.forEach(f => f(err))
     }
   }
@@ -98,9 +98,9 @@ class _Promise{
       if(this.status === "onRejected") {
         setTimeout(() => {
           try {
-            let error = this.error
-            error = onRejected(this.error);
-            resolve(error)
+            let reason = this.reason
+            reason = onRejected(this.reason);
+            resolve(reason)
           } catch (e) {
             reject(e)
           }
@@ -121,8 +121,8 @@ class _Promise{
         this.onRejectedArr.push((data) => {
           setTimeout(() => {
             try {
-              let error = onRejected(data)
-              resolve(error)
+              let reason = onRejected(data)
+              resolve(reason)
             } catch (e) {
               reject(e)
             }
@@ -137,7 +137,7 @@ class _Promise{
       if(this.status === "onRejected") {
         try{
           setTimeout(() => {
-            let value = this.error
+            let value = this.reason
             if(typeof onRejected === 'function') {
               value = onRejected(value)
             }
@@ -202,6 +202,9 @@ _Promise.race = data => {
       )
     }
   })
+}
+_Promise.allSettled = data => {
+
 }
 _Promise.resolve = data => {
   return new _Promise(res => res(data))
