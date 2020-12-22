@@ -165,6 +165,9 @@ class _Promise{
     })
     return newPromise
   }
+  finally() {
+    
+  }
 }
 _Promise.defer = _Promise.deferred = () => {
   let obj = {}
@@ -181,7 +184,7 @@ _Promise.all = data => {
   return new _Promise((resolve, reject) => {
     for(let i = 0; i < total; i++) {
       data[i].then(res => {
-        result.push(res)
+        result[i] = res
         count++
         if(total === count) {
           resolve(result)
@@ -204,7 +207,22 @@ _Promise.race = data => {
   })
 }
 _Promise.allSettled = data => {
-
+  const total  = data.length
+  const result = []
+  let count    = 0
+  return new Promise((resolve, reject) => {
+    for(let i = 0; i < total; i++) {
+      data[i].then(res => {
+        result[i] = res
+        count++ 
+        if(count === total) resolve(result)
+      }, res => {
+        result[i] = res
+        count++ 
+        if(count === total) resolve(result)
+      })
+    }
+  })
 }
 _Promise.resolve = data => {
   return new _Promise(res => res(data))
